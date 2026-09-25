@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deli Catering - Sistem Pengeluaran Kas</title>
+<style>
+:root{
+  --blue:#4f9fc4;
+  --blue-dark:#2e7396;
+  --blue-soft:#eaf6fb;
+  --cream:#fffaf0;
+  --cream-dark:#f4ead5;
+  --text:#29404b;
+  --muted:#71848c;
+  --white:#ffffff;
+  --green:#4b9b78;
+  --red:#c85c5c;
+  --shadow:0 8px 25px rgba(52,101,122,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,sans-serif}
+body{background:var(--cream);color:var(--text)}
+.sidebar{
+  position:fixed;left:0;top:0;width:245px;height:100vh;
+  background:linear-gradient(180deg,#5aa8cc,#347c9f);
+  color:white;padding:25px 18px;box-shadow:4px 0 18px rgba(40,100,130,.15)
+}
+.logo{text-align:center;margin-bottom:35px}
+.logo .icon{font-size:43px}
+.logo h2{font-size:23px;margin-top:5px}
+.logo p{font-size:12px;opacity:.85;margin-top:3px}
+.menu{list-style:none}
+.menu li{margin:8px 0}
+.menu a{
+  display:block;color:white;text-decoration:none;padding:13px 15px;border-radius:11px;
+  transition:.2s;cursor:pointer
+}
+.menu a:hover,.menu a.active{background:rgba(255,255,255,.18)}
+.main{margin-left:245px;padding:28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+.topbar h1{color:var(--blue-dark);font-size:28px}
+.topbar p{color:var(--muted);margin-top:4px}
+.date{background:white;padding:10px 17px;border-radius:11px;box-shadow:var(--shadow);font-size:14px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:25px}
+.card{
+  background:white;border-radius:16px;padding:20px;box-shadow:var(--shadow);
+  border-top:4px solid var(--blue)
+}
+.card:nth-child(2){border-top-color:#78b9a0}
+.card:nth-child(3){border-top-color:#e2b866}
+.card:nth-child(4){border-top-color:#cf7777}
+.card-title{font-size:12px;color:var(--muted);margin-bottom:10px}
+.number{font-size:24px;font-weight:700;color:var(--blue-dark)}
+.small{font-size:12px;color:var(--muted);margin-top:7px}
+.panel{
+  background:white;border-radius:17px;padding:22px;margin-bottom:24px;box-shadow:var(--shadow)
+}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.panel-header h2{color:var(--blue-dark);font-size:20px}
+.btn{
+  border:0;border-radius:9px;padding:10px 15px;cursor:pointer;font-size:13px;font-weight:600
+}
+.btn-primary{background:var(--blue);color:white}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-edit{background:#e8f5fb;color:var(--blue-dark);margin-right:5px}
+.btn-delete{background:#fdeaea;color:var(--red)}
+.btn-detail{background:#edf7f1;color:#39775b;margin-right:5px}
+.tools{display:flex;gap:10px;margin-bottom:18px}
+.search,input,select,textarea{
+  padding:11px 13px;border:1px solid #d9e5e9;border-radius:9px;outline:none;background:white
+}
+.search{flex:1}
+input:focus,select:focus,textarea:focus{border-color:var(--blue)}
+table{width:100%;border-collapse:collapse;min-width:850px}
+.table-container{overflow-x:auto}
+th{background:var(--blue-soft);color:var(--blue-dark);font-size:13px;padding:13px 10px;text-align:left;border-bottom:2px solid #d8edf5}
+td{padding:13px 10px;border-bottom:1px solid #edf1f2;font-size:13px}
+tr:hover{background:#fcfdfd}
+.badge{display:inline-block;padding:5px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-operasional{background:#e8f5fb;color:#2e7396}
+.badge-bahan{background:#fff4d9;color:#9a711e}
+.badge-gaji{background:#edf7f1;color:#39775b}
+.badge-lain{background:#f0ecfa;color:#7457a5}
+.empty{text-align:center;padding:35px;color:#8da0a7}
+.summary{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:22px
+}
+.summary-box{background:var(--blue-soft);border-radius:13px;padding:17px}
+.summary-box p{font-size:12px;color:var(--muted)}
+.summary-box h3{color:var(--blue-dark);margin-top:7px;font-size:20px}
+.modal{
+  display:none;position:fixed;z-index:99;inset:0;background:rgba(35,70,82,.42);
+  justify-content:center;align-items:center
+}
+.modal-content{
+  width:720px;max-width:94%;max-height:90vh;overflow-y:auto;background:white;
+  border-radius:18px;padding:25px
+}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-header h2{color:var(--blue-dark)}
+.close{font-size:26px;cursor:pointer;color:#8c999e}
+.form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.form-group{display:flex;flex-direction:column}
+.form-group.full{grid-column:1/-1}
+label{font-size:13px;margin-bottom:6px;color:#526871;font-weight:600}
+.form-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.btn-cancel{background:#edf0f1;color:#526168}
+.note{
+  background:var(--cream);border-left:4px solid #e2b866;padding:13px 15px;
+  border-radius:8px;margin-bottom:18px;font-size:13px;color:#6d6657
+}
+.page{display:none}
+.page.active{display:block}
+@media(max-width:1050px){
+ .cards{grid-template-columns:repeat(2,1fr)}
+ .summary{grid-template-columns:1fr}
+}
+@media(max-width:750px){
+ .sidebar{position:relative;width:100%;height:auto}
+ .main{margin-left:0;padding:18px}
+ .cards{grid-template-columns:1fr}
+ .form-grid{grid-template-columns:1fr}
+ .form-group.full{grid-column:auto}
+ .topbar{display:block}.date{display:inline-block;margin-top:10px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="logo">
+    <div class="icon">🍽️</div>
+    <h2>Deli Catering</h2>
+    <p>Sistem Pengeluaran Kas</p>
+  </div>
+  <ul class="menu">
+    <li><a class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</a></li>
+    <li><a onclick="showPage('pengeluaran',this)">💸 Data Pengeluaran</a></li>
+    <li><a onclick="openModal()">＋ Tambah Pengeluaran</a></li>
+  </ul>
+</aside>
+
+<main class="main">
+  <div class="topbar">
+    <div>
+      <h1>🍽️ Deli Catering</h1>
+      <p>Sistem Informasi Pengeluaran Kas Usaha Catering</p>
+    </div>
+    <div class="date" id="tanggal"></div>
+  </div>
+
+  <section id="dashboard" class="page active">
+    <div class="cards">
+      <div class="card">
+        <div class="card-title">TOTAL PENGELUARAN</div>
+        <div class="number" id="totalPengeluaran">Rp0</div>
+        <div class="small">Seluruh transaksi tercatat</div>
+      </div>
+      <div class="card">
+        <div class="card-title">TRANSAKSI</div>
+        <div class="number" id="jumlahTransaksi">0</div>
+        <div class="small">Jumlah pengeluaran</div>
+      </div>
+      <div class="card">
+        <div class="card-title">PENGELUARAN TERBESAR</div>
+        <div class="number" id="terbesar">Rp0</div>
+        <div class="small">Satu transaksi terbesar</div>
+      </div>
+      <div class="card">
+        <div class="card-title">BULAN INI</div>
+        <div class="number" id="bulanIni">Rp0</div>
+        <div class="small">Pengeluaran bulan berjalan</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>📊 Ringkasan Pengeluaran</h2>
+          <p style="font-size:13px;color:#71848c;margin-top:4px">Pemakaian kas Deli Catering berdasarkan kategori</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Tambah Pengeluaran</button>
+      </div>
+
+      <div class="summary">
+        <div class="summary-box"><p>Bahan Baku</p><h3 id="sumBahan">Rp0</h3></div>
+        <div class="summary-box"><p>Operasional</p><h3 id="sumOperasional">Rp0</h3></div>
+        <div class="summary-box"><p>Gaji & Upah</p><h3 id="sumGaji">Rp0</h3></div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead><tr>
+            <th>No</th><th>Tanggal</th><th>No. Bukti</th><th>Keterangan</th>
+            <th>Kategori</th><th>Metode</th><th>Jumlah</th>
+          </tr></thead>
+          <tbody id="recentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="pengeluaran" class="page">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>💸 Data Pengeluaran Kas</h2>
+          <p style="font-size:13px;color:#71848c;margin-top:4px">Kelola transaksi kas keluar Deli Catering</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ Tambah Pengeluaran</button>
+      </div>
+
+      <div class="note">Catat setiap pengeluaran agar arus kas Deli Catering lebih mudah dipantau dan terdokumentasi.</div>
+
+      <div class="tools">
+        <input class="search" id="search" placeholder="🔍 Cari keterangan, nomor bukti, atau kategori..." onkeyup="render()">
+        <select id="filter" onchange="render()">
+          <option value="">Semua Kategori</option>
+          <option value="Bahan Baku">Bahan Baku</option>
+          <option value="Operasional">Operasional</option>
+          <option value="Gaji & Upah">Gaji & Upah</option>
+          <option value="Lain-lain">Lain-lain</option>
+        </select>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead><tr>
+            <th>No</th><th>Tanggal</th><th>No. Bukti</th><th>Keterangan</th>
+            <th>Kategori</th><th>Metode</th><th>Jumlah</th><th>Aksi</th>
+          </tr></thead>
+          <tbody id="expenseTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Tambah Pengeluaran</h2>
+      <span class="close" onclick="closeModal()">×</span>
+    </div>
+    <form id="expenseForm">
+      <input type="hidden" id="editIndex">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="tanggalInput" required>
+        </div>
+        <div class="form-group">
+          <label>No. Bukti</label>
+          <input type="text" id="noBukti" placeholder="Contoh: KK-001" required>
+        </div>
+        <div class="form-group full">
+          <label>Keterangan</label>
+          <input type="text" id="keterangan" placeholder="Contoh: Pembelian bahan baku ayam" required>
+        </div>
+        <div class="form-group">
+          <label>Kategori</label>
+          <select id="kategori" required>
+            <option value="">Pilih kategori</option>
+            <option value="Bahan Baku">Bahan Baku</option>
+            <option value="Operasional">Operasional</option>
+            <option value="Gaji & Upah">Gaji & Upah</option>
+            <option value="Lain-lain">Lain-lain</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Metode Pembayaran</label>
+          <select id="metode" required>
+            <option value="">Pilih metode</option>
+            <option value="Kas">Kas</option>
+            <option value="Transfer">Transfer</option>
+            <option value="QRIS">QRIS</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Jumlah Pengeluaran (Rp)</label>
+          <input type="number" id="jumlah" min="0" placeholder="Masukkan nominal" required>
+        </div>
+      </div>
+      <div class="form-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan Data</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+/* =====================================
+   KONFIGURASI SUPABASE
+===================================== */
+
+const SUPABASE_URL = "https://wzcrhtrvpgczfmpbldvo.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_OnbnzvMW1a7ONfj0he10GQ_HpC52p6o";
+
+const supabaseClient = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+);
+
+let expenses = [];
+
+// row Supabase (snake_case) -> objek dipakai di kode (camelCase)
+function mapRowToExpense(row) {
+    return {
+        id: row.id,
+        tanggal: row.tanggal,
+        noBukti: row.no_bukti,
+        keterangan: row.keterangan,
+        kategori: row.kategori,
+        metode: row.metode,
+        jumlah: Number(row.jumlah)
+    };
+}
+
+// objek (camelCase) -> kolom Supabase (snake_case)
+function mapExpenseToRow(e) {
+    return {
+        tanggal: e.tanggal,
+        no_bukti: e.noBukti,
+        keterangan: e.keterangan,
+        kategori: e.kategori,
+        metode: e.metode,
+        jumlah: e.jumlah
+    };
+}
+
+async function loadExpenses() {
+    const { data, error } = await supabaseClient
+        .from("expenses")
+        .select("*")
+        .order("tanggal", { ascending: false });
+
+    if (error) {
+        alert("Gagal memuat data dari Supabase:\n" + error.message);
+        expenses = [];
+        return;
+    }
+
+    expenses = (data || []).map(mapRowToExpense);
+}
+
+function rupiah(n){return new Intl.NumberFormat("id-ID",{style:"currency",currency:"IDR",maximumFractionDigits:0}).format(n)}
+function badge(k){
+  let cls = k==="Bahan Baku"?"badge-bahan":k==="Operasional"?"badge-operasional":k==="Gaji & Upah"?"badge-gaji":"badge-lain";
+  return `<span class="badge ${cls}">${k}</span>`;
+}
+function formatDate(d){
+  return new Date(d+"T00:00:00").toLocaleDateString("id-ID",{day:"2-digit",month:"short",year:"numeric"});
+}
+function updateDashboard(){
+  const total=expenses.reduce((s,e)=>s+Number(e.jumlah),0);
+  const terbesar=expenses.length?Math.max(...expenses.map(e=>Number(e.jumlah))):0;
+  const now=new Date();
+  const bulan=expenses.filter(e=>{
+    const d=new Date(e.tanggal+"T00:00:00");
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,e)=>s+Number(e.jumlah),0);
+  const kategori=k=>expenses.filter(e=>e.kategori===k).reduce((s,e)=>s+Number(e.jumlah),0);
+
+  document.getElementById("totalPengeluaran").innerText=rupiah(total);
+  document.getElementById("jumlahTransaksi").innerText=expenses.length;
+  document.getElementById("terbesar").innerText=rupiah(terbesar);
+  document.getElementById("bulanIni").innerText=rupiah(bulan);
+  document.getElementById("sumBahan").innerText=rupiah(kategori("Bahan Baku"));
+  document.getElementById("sumOperasional").innerText=rupiah(kategori("Operasional"));
+  document.getElementById("sumGaji").innerText=rupiah(kategori("Gaji & Upah"));
+}
+function render(){
+  const search=(document.getElementById("search")?.value||"").toLowerCase();
+  const filter=document.getElementById("filter")?.value||"";
+  const data=expenses.filter(e=>{
+    const text=(e.keterangan+" "+e.noBukti+" "+e.kategori).toLowerCase();
+    return text.includes(search)&&(filter===""||e.kategori===filter);
+  });
+  document.getElementById("expenseTable").innerHTML=data.length?data.map((e,i)=>`
+    <tr>
+      <td>${i+1}</td><td>${formatDate(e.tanggal)}</td><td><strong>${e.noBukti}</strong></td>
+      <td>${e.keterangan}</td><td>${badge(e.kategori)}</td><td>${e.metode}</td>
+      <td><strong>${rupiah(e.jumlah)}</strong></td>
+      <td>
+        <button class="btn btn-edit" onclick="editExpense(${expenses.indexOf(e)})">Edit</button>
+        <button class="btn btn-delete" onclick="deleteExpense(${expenses.indexOf(e)})">Hapus</button>
+      </td>
+    </tr>`).join(""):`<tr><td colspan="8"><div class="empty">Belum ada data pengeluaran.</div></td></tr>`;
+
+  const recent=[...expenses].sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).slice(0,5);
+  document.getElementById("recentTable").innerHTML=recent.length?recent.map((e,i)=>`
+    <tr><td>${i+1}</td><td>${formatDate(e.tanggal)}</td><td>${e.noBukti}</td>
+    <td>${e.keterangan}</td><td>${badge(e.kategori)}</td><td>${e.metode}</td>
+    <td><strong>${rupiah(e.jumlah)}</strong></td></tr>`).join(""):`<tr><td colspan="7"><div class="empty">Belum ada transaksi.</div></td></tr>`;
+  updateDashboard();
+}
+function showPage(id,el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".menu a").forEach(a=>a.classList.remove("active"));
+  if(el)el.classList.add("active");
+  render();
+}
+function openModal(index=null){
+  document.getElementById("modal").style.display="flex";
+  document.getElementById("expenseForm").reset();
+  document.getElementById("editIndex").value="";
+  document.getElementById("modalTitle").innerText="Tambah Pengeluaran";
+  document.getElementById("tanggalInput").value=new Date().toISOString().slice(0,10);
+  if(index!==null){
+    const e=expenses[index];
+    document.getElementById("modalTitle").innerText="Edit Pengeluaran";
+    document.getElementById("editIndex").value=index;
+    document.getElementById("tanggalInput").value=e.tanggal;
+    document.getElementById("noBukti").value=e.noBukti;
+    document.getElementById("keterangan").value=e.keterangan;
+    document.getElementById("kategori").value=e.kategori;
+    document.getElementById("metode").value=e.metode;
+    document.getElementById("jumlah").value=e.jumlah;
+  }
+}
+function closeModal(){document.getElementById("modal").style.display="none"}
+document.getElementById("expenseForm").addEventListener("submit",async function(e){
+  e.preventDefault();
+  const index=document.getElementById("editIndex").value;
+  const data={
+    tanggal:document.getElementById("tanggalInput").value,
+    noBukti:document.getElementById("noBukti").value,
+    keterangan:document.getElementById("keterangan").value,
+    kategori:document.getElementById("kategori").value,
+    metode:document.getElementById("metode").value,
+    jumlah:Number(document.getElementById("jumlah").value)
+  };
+  const row = mapExpenseToRow(data);
+
+  if(index===""){
+    const { data: inserted, error } = await supabaseClient
+        .from("expenses")
+        .insert(row)
+        .select()
+        .single();
+    if (error) { alert("Gagal menambah data:\n" + error.message); return; }
+    data.id = inserted.id;
+    expenses.push(data);
+    alert("Data pengeluaran berhasil ditambahkan!");
+  } else {
+    const id = expenses[index].id;
+    const { error } = await supabaseClient
+        .from("expenses")
+        .update(row)
+        .eq("id", id);
+    if (error) { alert("Gagal memperbarui data:\n" + error.message); return; }
+    data.id = id;
+    expenses[index]=data;
+    alert("Data pengeluaran berhasil diperbarui!");
+  }
+
+  closeModal();render();
+});
+function editExpense(i){openModal(i)}
+async function deleteExpense(i){
+  if(confirm("Yakin ingin menghapus transaksi "+expenses[i].noBukti+"?")){
+    const { error } = await supabaseClient
+        .from("expenses")
+        .delete()
+        .eq("id", expenses[i].id);
+    if (error) { alert("Gagal menghapus data:\n" + error.message); return; }
+    expenses.splice(i,1);render();alert("Data berhasil dihapus.");
+  }
+}
+document.getElementById("tanggal").innerText=new Date().toLocaleDateString("id-ID",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+
+async function initApp(){
+    await loadExpenses();
+    render();
+}
+initApp();
+
+window.onclick=e=>{if(e.target===document.getElementById("modal"))closeModal()}
+</script>
+</body>
+</html>
